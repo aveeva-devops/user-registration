@@ -12,16 +12,28 @@ except:
     print("Could not connect to MongoDb")
 
 # Create or use existing database UserProfile
-db = client.UserData
+db = client.UserRegister
 
 # Create a collection or Switch to existing collection:
-collection = db.UserProfile
+collection = db.UserRegister
 # Insert data in database
 @app.route("/userdata", methods=['POST'])
 def insert_data():
     postedData = request.get_json(force=True)
     collection.insert_one(postedData).inserted_id
     return ('', 204)
+
+@app.route('/create', methods=['POST'])
+def create():
+  if 'profile_image' in request.files:
+    profile_image = request.files['profile_image']
+    db.save_file(profile_image.filename, profile_image)
+    collection.insert({'username': request.get('username'), 'profile_image_name': profile_image.filename})
+  return 'Done'
+
+#@app.route('/file/<filename>')
+#def file(filename):
+#  return mongo.send_file(filename)
 
 # Get data from database
 @app.route('/getdata')
